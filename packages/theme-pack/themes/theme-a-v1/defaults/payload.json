@@ -1,0 +1,48 @@
+{
+  "settings": {
+    "brand": {
+      "primaryColor": "#2563eb",
+      "secondaryColor": "#1e40af",
+      "font": "Inter, sans-serif"
+    },
+    "seo": {
+      "titleSuffix": " | My Website"
+    }
+  },
+  "routes": {
+    "home": {
+      "seo": {"title": "Home"},
+      "sections": [
+        {"type": "header", "visible": true, "props": {"logoText": "My Site", "navLinks": [{"label": "Home", "href": "/"}, {"label": "About", "href": "/about"}, {"label": "Listings", "href": "/listings"}]}},
+        {"type": "hero", "visible": true, "props": {"title": "Find Your Dream Home", "subtitle": "Browse our curated selection of premium properties", "backgroundImage": ""}},
+        {"type": "lead-form", "visible": true, "props": {"headline": "Get in Touch", "submitLabel": "Send Message"}},
+        {"type": "footer", "visible": true, "props": {"text": "\u00a9 2024 My Site. All rights reserved.", "links": []}}
+      ]
+    },
+    "about": {
+      "seo": {"title": "About Us"},
+      "sections": [
+        {"type": "header", "visible": true, "props": {"logoText": "My Site", "navLinks": [{"label": "Home", "href": "/"}, {"label": "About", "href": "/about"}, {"label": "Listings", "href": "/listings"}]}},
+        {"type": "hero", "visible": true, "props": {"title": "About Our Company", "subtitle": "Dedicated to helping you find the perfect property", "backgroundImage": ""}},
+        {"type": "footer", "visible": true, "props": {"text": "\u00a9 2024 My Site. All rights reserved.", "links": []}}
+      ]
+    },
+    "listings": {
+      "seo": {"title": "Listings"},
+      "sections": [
+        {"type": "header", "visible": true, "props": {"logoText": "My Site", "navLinks": [{"label": "Home", "href": "/"}, {"label": "About", "href": "/about"}, {"label": "Listings", "href": "/listings"}]}},
+        {"type": "gallery", "visible": true, "props": {"title": "Featured Properties", "columns": 3}},
+        {"type": "footer", "visible": true, "props": {"text": "\u00a9 2024 My Site. All rights reserved.", "links": []}}
+      ]
+    },
+    "listing-detail": {
+      "seo": {"title": "Property Details"},
+      "sections": [
+        {"type": "header", "visible": true, "props": {"logoText": "My Site", "navLinks": [{"label": "Home", "href": "/"}, {"label": "About", "href": "/about"}, {"label": "Listings", "href": "/listings"}]}},
+        {"type": "hero", "visible": true, "props": {"title": "", "subtitle": "", "backgroundImage": ""}},
+        {"type": "lead-form", "visible": true, "props": {"headline": "Interested in this property?", "submitLabel": "Request Info"}},
+        {"type": "footer", "visible": true, "props": {"text": "\u00a9 2024 My Site. All rights reserved.", "links": []}}
+      ]
+    }
+  }
+}

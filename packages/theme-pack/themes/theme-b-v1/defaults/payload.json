@@ -1,0 +1,49 @@
+{
+  "settings": {
+    "brand": {
+      "primaryColor": "#f97316",
+      "secondaryColor": "#ea580c",
+      "font": "Poppins, sans-serif"
+    },
+    "seo": {
+      "titleSuffix": " | Bold Realty"
+    }
+  },
+  "routes": {
+    "home": {
+      "seo": {"title": "Home"},
+      "sections": [
+        {"type": "navbar", "visible": true, "props": {"brandName": "Bold Realty", "links": [{"label": "Home", "href": "/"}, {"label": "About", "href": "/about"}, {"label": "Listings", "href": "/listings"}]}},
+        {"type": "banner", "visible": true, "props": {"heading": "Live Bold. Live Here.", "subheading": "Discover extraordinary properties curated for modern living", "ctaText": "Browse Listings", "ctaHref": "/listings"}},
+        {"type": "features", "visible": true, "props": {"title": "Why Choose Us", "items": [{"icon": "search", "title": "Curated Selection", "desc": "Hand-picked properties that meet the highest standards"}, {"icon": "shield", "title": "Trusted Agents", "desc": "Work with experienced professionals who know your market"}, {"icon": "zap", "title": "Fast Closing", "desc": "Streamlined process to get you into your dream home faster"}]}},
+        {"type": "cta", "visible": true, "props": {"heading": "Ready to find your dream home?", "buttonLabel": "Get Started"}},
+        {"type": "site-footer", "visible": true, "props": {"copyright": "\u00a9 2024 Bold Realty. All rights reserved.", "links": []}}
+      ]
+    },
+    "about": {
+      "seo": {"title": "About"},
+      "sections": [
+        {"type": "navbar", "visible": true, "props": {"brandName": "Bold Realty", "links": [{"label": "Home", "href": "/"}, {"label": "About", "href": "/about"}, {"label": "Listings", "href": "/listings"}]}},
+        {"type": "banner", "visible": true, "props": {"heading": "Our Story", "subheading": "Building trust through exceptional service since 2020", "ctaText": "", "ctaHref": ""}},
+        {"type": "site-footer", "visible": true, "props": {"copyright": "\u00a9 2024 Bold Realty. All rights reserved.", "links": []}}
+      ]
+    },
+    "listings": {
+      "seo": {"title": "Listings"},
+      "sections": [
+        {"type": "navbar", "visible": true, "props": {"brandName": "Bold Realty", "links": [{"label": "Home", "href": "/"}, {"label": "About", "href": "/about"}, {"label": "Listings", "href": "/listings"}]}},
+        {"type": "property-grid", "visible": true, "props": {"heading": "Available Properties", "columns": 3}},
+        {"type": "site-footer", "visible": true, "props": {"copyright": "\u00a9 2024 Bold Realty. All rights reserved.", "links": []}}
+      ]
+    },
+    "listing-detail": {
+      "seo": {"title": "Property Details"},
+      "sections": [
+        {"type": "navbar", "visible": true, "props": {"brandName": "Bold Realty", "links": [{"label": "Home", "href": "/"}, {"label": "About", "href": "/about"}, {"label": "Listings", "href": "/listings"}]}},
+        {"type": "banner", "visible": true, "props": {"heading": "", "subheading": "", "ctaText": "", "ctaHref": ""}},
+        {"type": "cta", "visible": true, "props": {"heading": "Interested in this property?", "buttonLabel": "Contact Agent"}},
+        {"type": "site-footer", "visible": true, "props": {"copyright": "\u00a9 2024 Bold Realty. All rights reserved.", "links": []}}
+      ]
+    }
+  }
+}

@@ -1,0 +1,172 @@
+services:
+  mysql_platform:
+    image: mysql:8
+    container_name: mysql_platform
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: microsite_platform
+    ports:
+      - "3316:3306"
+    volumes:
+      - mysql_platform_data:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-psecret"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql_tenant1:
+    image: mysql:8
+    container_name: mysql_tenant1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: tenant_sample
+    ports:
+      - "3317:3306"
+    volumes:
+      - mysql_tenant1_data:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-psecret"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - app-network
+    entrypoint: /bin/sh
+    command: >
+      -c "
+      minio server /data --console-address ':9001' &
+      sleep 5;
+      mc alias set local http://localhost:9000 minioadmin minioadmin;
+      mc mb --ignore-existing local/sites;
+      mc anonymous set download local/sites;
+      wait
+      "
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  platform-api:
+    build:
+      context: ./platform-api
+      dockerfile: Dockerfile
+    container_name: platform-api
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "composer install --no-interaction --no-progress --quiet 2>/dev/null; php artisan serve --host=0.0.0.0 --port=8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./platform-api:/app
+      - ./packages/theme-pack:/packages/theme-pack:ro
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+    depends_on:
+      mysql_platform:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    networks:
+      - app-network
+
+  site-runtime:
+    build:
+      context: ./site-runtime
+      dockerfile: Dockerfile
+    container_name: site-runtime
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "composer install --no-interaction --no-progress --quiet 2>/dev/null; php artisan serve --host=0.0.0.0 --port=8001"
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./site-runtime:/app
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+    depends_on:
+      mysql_platform:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/site-runtime.conf:/etc/nginx/conf.d/site-runtime.conf:ro
+      - ./infra/nginx/platform-api.conf:/etc/nginx/conf.d/platform-api.conf:ro
+    depends_on:
+      - platform-api
+      - site-runtime
+    networks:
+      - app-network
+
+  crm-spa:
+    build:
+      context: ./crm-spa
+      dockerfile: Dockerfile
+    container_name: crm-spa
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./crm-spa:/app
+      - /app/node_modules
+    networks:
+      - app-network
+
+volumes:
+  mysql_platform_data:
+  mysql_tenant1_data:
+  minio_data:
+
+networks:
+  app-network:
+    driver: bridge
