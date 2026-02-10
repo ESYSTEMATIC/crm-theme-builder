@@ -1,0 +1,20 @@
+/* ============================================================
+   Theme B - Bold Modern (Nuxt SSR)
+   Global base styles — component-specific styles are scoped in .vue files
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #0f172a;
+  color: #f1f5f9;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: #f97316; text-decoration: none; transition: color 0.2s; }
+a:hover { color: #ea580c; }
+
+img { max-width: 100%; height: auto; display: block; }

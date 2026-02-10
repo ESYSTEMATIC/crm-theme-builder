@@ -45,22 +45,6 @@ class ThemeRegistry
         return json_decode(File::get($path), true);
     }
 
-    /** Get base HTML template for a theme. */
-    public function getBaseTemplate(string $themeKey): string
-    {
-        $path = $this->getThemePath($themeKey) . '/public/templates/base.html';
-        if (!File::exists($path)) {
-            throw new \RuntimeException("Base template not found for theme: {$themeKey}");
-        }
-        return File::get($path);
-    }
-
-    /** Get path to theme's public assets directory. */
-    public function getAssetsPath(string $themeKey): string
-    {
-        return $this->getThemePath($themeKey) . '/public/assets';
-    }
-
     /** Sync all themes from disk to database. */
     public function syncAll(): array
     {

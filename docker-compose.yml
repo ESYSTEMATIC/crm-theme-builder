@@ -51,36 +51,6 @@ services:
       timeout: 5s
       retries: 5
 
-  minio:
-    image: minio/minio
-    container_name: minio
-    restart: unless-stopped
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    volumes:
-      - minio_data:/data
-    networks:
-      - app-network
-    entrypoint: /bin/sh
-    command: >
-      -c "
-      minio server /data --console-address ':9001' &
-      sleep 5;
-      mc alias set local http://localhost:9000 minioadmin minioadmin;
-      mc mb --ignore-existing local/sites;
-      mc anonymous set download local/sites;
-      wait
-      "
-    healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   platform-api:
     build:
       context: ./platform-api
@@ -102,33 +72,80 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      minio:
-        condition: service_started
     networks:
       - app-network
 
-  site-runtime:
+  site-gateway:
     build:
-      context: ./site-runtime
+      context: ./packages/site-gateway
       dockerfile: Dockerfile
-    container_name: site-runtime
+    container_name: site-gateway
     restart: unless-stopped
-    working_dir: /app
-    command: sh -c "composer install --no-interaction --no-progress --quiet 2>/dev/null; php artisan serve --host=0.0.0.0 --port=8001"
     ports:
-      - "8001:8001"
+      - "3000:3000"
     volumes:
-      - ./site-runtime:/app
+      - ./packages/site-gateway:/app
+      - /app/node_modules
     environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
+      - PORT=3000
+      - PLATFORM_DOMAIN=crmwebsite.com
+      - DB_PLATFORM_HOST=mysql_platform
+      - DB_PLATFORM_PORT=3306
+      - DB_PLATFORM_USERNAME=root
+      - DB_PLATFORM_PASSWORD=secret
+      - DB_PLATFORM_DATABASE=microsite_platform
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - THEME_ROUTES=theme-a-v1=http://theme-a-nuxt:3000,theme-b-v1=http://theme-b-nuxt:3000
     depends_on:
       mysql_platform:
         condition: service_healthy
       redis:
         condition: service_healthy
-      minio:
+      theme-a-nuxt:
         condition: service_started
+      theme-b-nuxt:
+        condition: service_started
+    networks:
+      - app-network
+
+  theme-a-nuxt:
+    build:
+      context: ./packages/theme-a-nuxt
+      dockerfile: Dockerfile
+    container_name: theme-a-nuxt
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./packages/theme-a-nuxt:/app
+      - /app/node_modules
+    environment:
+      - NUXT_PLATFORM_API_URL=http://platform-api:8000
+      - NITRO_PORT=3000
+      - NITRO_HOST=0.0.0.0
+    depends_on:
+      - platform-api
+    networks:
+      - app-network
+
+  theme-b-nuxt:
+    build:
+      context: ./packages/theme-b-nuxt
+      dockerfile: Dockerfile
+    container_name: theme-b-nuxt
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    volumes:
+      - ./packages/theme-b-nuxt:/app
+      - /app/node_modules
+    environment:
+      - NUXT_PLATFORM_API_URL=http://platform-api:8000
+      - NITRO_PORT=3000
+      - NITRO_HOST=0.0.0.0
+    depends_on:
+      - platform-api
     networks:
       - app-network
 
@@ -140,11 +157,11 @@ services:
       - "8080:80"
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./infra/nginx/site-runtime.conf:/etc/nginx/conf.d/site-runtime.conf:ro
+      - ./infra/nginx/site-gateway.conf:/etc/nginx/conf.d/site-gateway.conf:ro
       - ./infra/nginx/platform-api.conf:/etc/nginx/conf.d/platform-api.conf:ro
     depends_on:
       - platform-api
-      - site-runtime
+      - site-gateway
     networks:
       - app-network
 
@@ -165,7 +182,6 @@ services:
 volumes:
   mysql_platform_data:
   mysql_tenant1_data:
-  minio_data:
 
 networks:
   app-network:

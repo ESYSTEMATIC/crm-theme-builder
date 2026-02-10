@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Nuxt build output
+.nuxt/
+.output/
+
+# Logs
+*.log
+storage/logs/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Build artifacts
+dist/

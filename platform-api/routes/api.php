@@ -1,13 +1,11 @@
 <?php
 
 use App\Http\Controllers\DraftController;
-use App\Http\Controllers\PreviewFrameController;
 use App\Http\Controllers\PreviewSessionController;
 use App\Http\Controllers\Public\LeadController;
 use App\Http\Controllers\Public\PropertyController;
 use App\Http\Controllers\PublishController;
 use App\Http\Controllers\SiteController;
-use App\Http\Controllers\ThemeAssetController;
 use App\Http\Controllers\ThemeController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,9 +26,6 @@ Route::put('/sites/{id}/draft', [DraftController::class, 'update']);
 Route::post('/sites/{id}/preview-session', [PreviewSessionController::class, 'store']);
 Route::post('/sites/{id}/publish', [PublishController::class, 'store']);
 
-Route::get('/sites/{id}/preview-frame', [PreviewFrameController::class, 'show']);
-Route::get('/theme-assets/{themeKey}/{path}', [ThemeAssetController::class, 'show'])->where('path', '.*');
-
 /*
 |--------------------------------------------------------------------------
 | Public API Routes (called from microsite JS)
@@ -40,3 +35,11 @@ Route::get('/theme-assets/{themeKey}/{path}', [ThemeAssetController::class, 'sho
 Route::post('/public/leads', [LeadController::class, 'store']);
 Route::get('/public/properties', [PropertyController::class, 'index']);
 Route::get('/public/properties/{id}', [PropertyController::class, 'show']);
+
+/*
+|--------------------------------------------------------------------------
+| Internal API Routes (called from Nuxt theme servers)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/internal/site-payload/{siteId}', [\App\Http\Controllers\Internal\SiteResolveController::class, 'payload']);

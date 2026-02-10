@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\BuildSiteVersionJob;
 use App\Models\Platform\PreviewSession;
 use App\Models\Platform\Site;
 use Illuminate\Http\JsonResponse;
@@ -14,7 +13,7 @@ class PreviewSessionController extends Controller
     /**
      * POST /api/sites/{id}/preview-session
      *
-     * Build the draft version and create a preview session with a temporary token.
+     * Create a preview session with a temporary token.
      */
     public function store(int $id): JsonResponse
     {
@@ -33,9 +32,6 @@ class PreviewSessionController extends Controller
                 'error' => 'No draft version found for this site.',
             ], 404);
         }
-
-        // Dispatch the build job (runs synchronously when QUEUE_CONNECTION=sync)
-        BuildSiteVersionJob::dispatch($site->id, $draftVersion->id, 'draft');
 
         // Create preview session
         $token = Str::random(64);

@@ -676,3 +676,24 @@
 [2026-02-10 10:53:58] local.INFO: Built page: sites/7/draft/1/listings/index.html  
 [2026-02-10 10:53:58] local.INFO: Built page: sites/7/draft/1/listings/_detail/index.html  
 [2026-02-10 10:53:58] local.INFO: Build complete for site abodo version 1 mode draft  
+[2026-02-10 14:08:02] local.INFO: Building site ahmed version 1 mode draft  
+[2026-02-10 14:08:02] local.INFO: Built page: sites/8/draft/1/index.html  
+[2026-02-10 14:08:02] local.INFO: Built page: sites/8/draft/1/about/index.html  
+[2026-02-10 14:08:02] local.INFO: Built page: sites/8/draft/1/listings/index.html  
+[2026-02-10 14:08:02] local.INFO: Built page: sites/8/draft/1/listings/_detail/index.html  
+[2026-02-10 14:08:02] local.INFO: Build complete for site ahmed version 1 mode draft  
+[2026-02-10 14:39:15] local.INFO: Building site ahmed version 1 mode draft  
+[2026-02-10 14:39:15] local.INFO: Built page: sites/8/draft/1/index.html  
+[2026-02-10 14:39:15] local.INFO: Built page: sites/8/draft/1/about/index.html  
+[2026-02-10 14:39:15] local.INFO: Built page: sites/8/draft/1/listings/index.html  
+[2026-02-10 14:39:15] local.INFO: Built page: sites/8/draft/1/listings/_detail/index.html  
+[2026-02-10 14:39:15] local.INFO: Build complete for site ahmed version 1 mode draft  
+[2026-02-10 21:18:41] local.ERROR: Command "tinker" is not defined. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\CommandNotFoundException(code: 0): Command \"tinker\" is not defined. at /app/vendor/symfony/console/Application.php:759)
+[stacktrace]
+#0 /app/vendor/symfony/console/Application.php(298): Symfony\\Component\\Console\\Application->find('tinker')
+#1 /app/vendor/symfony/console/Application.php(195): Symfony\\Component\\Console\\Application->doRun(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#2 /app/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(198): Symfony\\Component\\Console\\Application->run(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#3 /app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1235): Illuminate\\Foundation\\Console\\Kernel->handle(Object(Symfony\\Component\\Console\\Input\\ArgvInput), Object(Symfony\\Component\\Console\\Output\\ConsoleOutput))
+#4 /app/artisan(13): Illuminate\\Foundation\\Application->handleCommand(Object(Symfony\\Component\\Console\\Input\\ArgvInput))
+#5 {main}
+"} 

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\BuildSiteVersionJob;
 use App\Models\Platform\Site;
 use App\Models\Platform\SiteVersion;
 use App\Models\Platform\SiteVersionPayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 
 class PublishController extends Controller
 {
@@ -18,7 +18,7 @@ class PublishController extends Controller
      * Publish the current draft version:
      * 1. Mark the draft version as published
      * 2. Set the site's published_version_id
-     * 3. Dispatch a build job for published mode
+     * 3. Bust site cache so gateway/Nuxt serve fresh content
      * 4. Create a new draft version with the same payload
      */
     public function store(int $id): JsonResponse
@@ -66,8 +66,8 @@ class PublishController extends Controller
             return $newDraftVersion;
         });
 
-        // Dispatch the build job for published mode (runs synchronously when QUEUE_CONNECTION=sync)
-        BuildSiteVersionJob::dispatch($site->id, $draftVersion->id, 'published');
+        // Bust gateway Redis cache (raw key, not Laravel-prefixed) so published content is served immediately
+        Redis::del("site_host:{$site->slug}." . config('app.platform_domain', 'crmwebsite.com'));
 
         // Reload the site with updated relations
         $site->load(['theme', 'domains', 'publishedVersion', 'draftVersion']);
