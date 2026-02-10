@@ -4,7 +4,7 @@ defineProps({ props: Object })
 
 <template>
   <footer class="tb-footer">
-    {{ props?.copyright || '' }}
+    {{ props?.copyright || '\u00a9 2024 Bold Realty. All rights reserved.' }}
   </footer>
 </template>
 

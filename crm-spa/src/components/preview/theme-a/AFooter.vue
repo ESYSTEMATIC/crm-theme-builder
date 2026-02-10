@@ -4,7 +4,7 @@ defineProps({ props: Object })
 
 <template>
   <footer class="ms-footer">
-    <p v-if="props?.text" class="ms-footer__text">{{ props.text }}</p>
+    <p class="ms-footer__text">{{ props?.text || '\u00a9 2024 My Site. All rights reserved.' }}</p>
     <nav v-if="props?.links?.length" class="ms-footer__links">
       <span v-for="(link, i) in props.links" :key="i">{{ link.label }}</span>
     </nav>

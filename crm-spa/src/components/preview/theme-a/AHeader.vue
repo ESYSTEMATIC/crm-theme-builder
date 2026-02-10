@@ -1,13 +1,19 @@
 <script setup>
 defineProps({ props: Object, settings: Object })
+
+const demoLinks = [
+  { label: 'Home' },
+  { label: 'About' },
+  { label: 'Listings' },
+]
 </script>
 
 <template>
   <header class="ms-header">
     <div class="ms-header__inner">
-      <span class="ms-header__logo">{{ props?.logoText || 'Site' }}</span>
+      <span class="ms-header__logo">{{ props?.logoText || 'My Site' }}</span>
       <nav class="ms-header__nav">
-        <span v-for="(link, i) in (props?.navLinks || [])" :key="i">{{ link.label }}</span>
+        <span v-for="(link, i) in (props?.navLinks?.length ? props.navLinks : demoLinks)" :key="i">{{ link.label }}</span>
       </nav>
     </div>
   </header>

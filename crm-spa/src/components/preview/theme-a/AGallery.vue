@@ -17,7 +17,7 @@ function formatPrice(n) {
 
 <template>
   <section class="ms-gallery">
-    <h2 v-if="props?.title" class="ms-gallery__title">{{ props.title }}</h2>
+    <h2 class="ms-gallery__title">{{ props?.title || 'Featured Properties' }}</h2>
     <div class="ms-gallery__grid" :style="{ gridTemplateColumns: `repeat(${props?.columns || 3}, 1fr)` }">
       <div v-for="(p, i) in placeholders" :key="i" class="ms-gallery__card">
         <div class="ms-gallery__card-image--placeholder">{{ p.title.charAt(0) }}</div>

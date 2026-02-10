@@ -1,5 +1,7 @@
 <script setup>
-defineProps({ props: Object })
+import { computed } from 'vue'
+
+const p = defineProps({ props: Object })
 
 const ICONS = {
   search: '\u{1F50D}',
@@ -9,20 +11,25 @@ const ICONS = {
   bath: '\u{1F6BF}',
   area: '\u{1F4D0}'
 }
+
+const demoItems = [
+  { icon: 'search', title: 'Curated Selection', desc: 'Hand-picked properties that meet the highest standards' },
+  { icon: 'shield', title: 'Trusted Agents', desc: 'Work with experienced professionals who know your market' },
+  { icon: 'zap', title: 'Fast Closing', desc: 'Streamlined process to get you into your dream home faster' },
+]
+
+const items = computed(() => p.props?.items?.length ? p.props.items : demoItems)
 </script>
 
 <template>
   <section class="tb-features">
     <div class="tb-features__inner">
-      <h2 v-if="props?.title" class="tb-features__title">{{ props.title }}</h2>
+      <h2 class="tb-features__title">{{ props?.title || 'Why Choose Us' }}</h2>
       <div class="tb-features__grid">
-        <div v-for="(item, i) in (props?.items || [])" :key="i" class="tb-feature-card">
+        <div v-for="(item, i) in items" :key="i" class="tb-feature-card">
           <div class="tb-feature-card__icon">{{ ICONS[item.icon] || '\u2728' }}</div>
           <h3 class="tb-feature-card__title">{{ item.title || '' }}</h3>
           <p class="tb-feature-card__desc">{{ item.desc || '' }}</p>
-        </div>
-        <div v-if="!props?.items?.length" class="tb-features__empty">
-          Add feature items in the section editor
         </div>
       </div>
     </div>

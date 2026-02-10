@@ -18,7 +18,7 @@ function formatPrice(n) {
 <template>
   <section class="tb-pgrid">
     <div class="tb-pgrid__inner">
-      <h2 v-if="props?.heading" class="tb-pgrid__heading">{{ props.heading }}</h2>
+      <h2 class="tb-pgrid__heading">{{ props?.heading || 'Available Properties' }}</h2>
       <div class="tb-pgrid__grid">
         <div v-for="(p, i) in placeholders" :key="i" class="tb-pcard">
           <div class="tb-pcard__img-placeholder">{{ p.title }}</div>

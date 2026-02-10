@@ -1,13 +1,19 @@
 <script setup>
 defineProps({ props: Object })
+
+const demo = {
+  heading: 'Live Bold. Live Here.',
+  subheading: 'Discover extraordinary properties curated for modern living',
+  ctaText: 'Browse Listings',
+}
 </script>
 
 <template>
   <section class="tb-banner">
     <div class="tb-banner__content">
-      <h1 v-if="props?.heading" class="tb-banner__heading">{{ props.heading }}</h1>
-      <p v-if="props?.subheading" class="tb-banner__sub">{{ props.subheading }}</p>
-      <span v-if="props?.ctaText" class="tb-btn">{{ props.ctaText }}</span>
+      <h1 class="tb-banner__heading">{{ props?.heading || demo.heading }}</h1>
+      <p class="tb-banner__sub">{{ props?.subheading || demo.subheading }}</p>
+      <span class="tb-btn">{{ props?.ctaText || demo.ctaText }}</span>
     </div>
   </section>
 </template>

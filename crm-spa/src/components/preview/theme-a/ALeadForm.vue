@@ -5,7 +5,7 @@ defineProps({ props: Object })
 <template>
   <section class="ms-lead-form">
     <div class="ms-lead-form__inner">
-      <h2 v-if="props?.headline" class="ms-lead-form__headline">{{ props.headline }}</h2>
+      <h2 class="ms-lead-form__headline">{{ props?.headline || 'Get in Touch' }}</h2>
       <form class="ms-lead-form__form" @submit.prevent>
         <div class="ms-lead-form__field">
           <label class="ms-lead-form__label">Name</label>
@@ -24,7 +24,7 @@ defineProps({ props: Object })
           <textarea class="ms-lead-form__textarea" placeholder="How can we help you?" rows="4" disabled></textarea>
         </div>
         <button type="button" class="ms-lead-form__submit" disabled>
-          {{ props?.submitLabel || 'Submit' }}
+          {{ props?.submitLabel || 'Send Message' }}
         </button>
       </form>
     </div>

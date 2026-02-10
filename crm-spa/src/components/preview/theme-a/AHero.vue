@@ -1,5 +1,10 @@
 <script setup>
 defineProps({ props: Object })
+
+const demo = {
+  title: 'Find Your Dream Home',
+  subtitle: 'Browse our curated selection of premium properties',
+}
 </script>
 
 <template>
@@ -9,8 +14,8 @@ defineProps({ props: Object })
   >
     <div class="ms-hero__overlay"></div>
     <div class="ms-hero__content">
-      <h1 v-if="props?.title" class="ms-hero__title">{{ props.title }}</h1>
-      <p v-if="props?.subtitle" class="ms-hero__subtitle">{{ props.subtitle }}</p>
+      <h1 class="ms-hero__title">{{ props?.title || demo.title }}</h1>
+      <p class="ms-hero__subtitle">{{ props?.subtitle || demo.subtitle }}</p>
     </div>
   </section>
 </template>

@@ -1,13 +1,19 @@
 <script setup>
 defineProps({ props: Object, settings: Object })
+
+const demoLinks = [
+  { label: 'Home' },
+  { label: 'About' },
+  { label: 'Listings' },
+]
 </script>
 
 <template>
   <nav class="tb-navbar">
     <div class="tb-navbar__inner">
-      <span class="tb-navbar__brand">{{ props?.brandName || 'Site' }}</span>
+      <span class="tb-navbar__brand">{{ props?.brandName || 'Bold Realty' }}</span>
       <ul class="tb-navbar__links">
-        <li v-for="(link, i) in (props?.links || [])" :key="i">
+        <li v-for="(link, i) in (props?.links?.length ? props.links : demoLinks)" :key="i">
           <span>{{ link.label }}</span>
         </li>
       </ul>

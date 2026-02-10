@@ -5,14 +5,14 @@ defineProps({ props: Object })
 <template>
   <section class="tb-cta">
     <div class="tb-cta__inner">
-      <h2 v-if="props?.heading" class="tb-cta__heading">{{ props.heading }}</h2>
+      <h2 class="tb-cta__heading">{{ props?.heading || 'Ready to find your dream home?' }}</h2>
       <form class="tb-cta__form" @submit.prevent>
         <input class="tb-input" type="text" placeholder="Your Name" disabled />
         <input class="tb-input" type="email" placeholder="Email Address" disabled />
         <input class="tb-input" type="tel" placeholder="Phone (optional)" disabled />
         <textarea class="tb-input tb-input--full" placeholder="Message" rows="3" disabled></textarea>
         <button type="button" class="tb-btn tb-cta__submit" disabled>
-          {{ props?.buttonLabel || 'Submit' }}
+          {{ props?.buttonLabel || 'Get Started' }}
         </button>
       </form>
     </div>
