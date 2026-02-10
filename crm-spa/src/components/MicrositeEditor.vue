@@ -1,9 +1,10 @@
 <script setup>
-import { ref, reactive, computed, onMounted, watch, nextTick, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getSite, getDraft } from '../api/client.js'
 import SectionEditor from './SectionEditor.vue'
 import PreviewPublishBar from './PreviewPublishBar.vue'
+import ThemePreview from './preview/ThemePreview.vue'
 
 const route = useRoute()
 const siteId = computed(() => route.params.id)
@@ -40,13 +41,8 @@ const selectedRouteId = ref('')
 const expandedSections = reactive({})
 const showSettings = ref(false)
 
-// Preview iframe state
-const previewIframe = ref(null)
-const previewLoading = ref(true)
-const previewReady = ref(false)
-
-// Debounce timer for postMessage
-let postMessageTimer = null
+// Computed: theme key from site data
+const themeKey = computed(() => site.value?.theme?.key || '')
 
 // Computed: list of routes from manifest
 const manifestRoutes = computed(() => {
@@ -86,25 +82,8 @@ watch(
   }
 )
 
-// Watch payload changes for live preview via postMessage
-watch(
-  () => JSON.stringify(payload),
-  () => {
-    debouncedPostMessage()
-  }
-)
-
-// Watch route selection for live preview
-watch(selectedRouteId, () => {
-  sendPreviewUpdate()
-})
-
 onMounted(async () => {
   await loadData()
-})
-
-onBeforeUnmount(() => {
-  if (postMessageTimer) clearTimeout(postMessageTimer)
 })
 
 async function loadData() {
@@ -143,9 +122,6 @@ async function loadData() {
     // Take snapshot for dirty tracking
     originalPayloadSnapshot.value = JSON.stringify(payload)
     dirty.value = false
-
-    // Initialize the live preview iframe
-    await initPreview()
   } catch (err) {
     error.value =
       err.response?.data?.message || err.message || 'Failed to load site data'
@@ -181,50 +157,6 @@ function buildDefaultPayload() {
   }
 
   payload.routes = routes
-}
-
-async function initPreview() {
-  previewLoading.value = true
-  previewReady.value = false
-  try {
-    await nextTick()
-    if (previewIframe.value) {
-      const routeId = selectedRouteId.value || ''
-      previewIframe.value.src = `/api/sites/${siteId.value}/preview-frame?routeId=${encodeURIComponent(routeId)}`
-    }
-  } catch (err) {
-    console.error('Failed to load preview frame:', err)
-    previewLoading.value = false
-  }
-}
-
-function onIframeLoad() {
-  previewLoading.value = false
-  previewReady.value = true
-  // Send initial update to sync the current editing state
-  sendPreviewUpdate()
-}
-
-function sendPreviewUpdate() {
-  if (!previewReady.value || !previewIframe.value) return
-  const currentRoute = payload.routes[selectedRouteId.value]
-  if (!currentRoute) return
-
-  const message = {
-    type: 'MICROSITE_PREVIEW_UPDATE',
-    settings: JSON.parse(JSON.stringify(payload.settings)),
-    route: JSON.parse(JSON.stringify(currentRoute)),
-    routeId: selectedRouteId.value,
-  }
-
-  previewIframe.value.contentWindow.postMessage(message, '*')
-}
-
-function debouncedPostMessage() {
-  if (postMessageTimer) clearTimeout(postMessageTimer)
-  postMessageTimer = setTimeout(() => {
-    sendPreviewUpdate()
-  }, 150)
 }
 
 function selectRoute(routeId) {
@@ -273,8 +205,6 @@ function getSectionLabel(sectionType) {
 function handleSaved() {
   originalPayloadSnapshot.value = JSON.stringify(payload)
   dirty.value = false
-  // Rebuild preview after save so MinIO draft is fresh
-  initPreview()
 }
 
 function handlePublished() {
@@ -521,16 +451,16 @@ function handlePublished() {
 
         <!-- Right: Live Preview -->
         <div class="editor__preview-panel">
-          <div v-if="previewLoading" class="editor__preview-loading">
-            <div class="spinner spinner--lg"></div>
-            <p>Loading preview...</p>
+          <ThemePreview
+            v-if="selectedRouteId && themeKey"
+            :theme-key="themeKey"
+            :sections="currentPageSections"
+            :settings="payload.settings"
+            :route-id="selectedRouteId"
+          />
+          <div v-else class="editor__preview-empty">
+            <p>Select a page to see the preview.</p>
           </div>
-          <iframe
-            ref="previewIframe"
-            class="editor__preview-iframe"
-            @load="onIframeLoad"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-          ></iframe>
         </div>
       </div>
 
@@ -1057,24 +987,13 @@ function handlePublished() {
   align-items: stretch;
 }
 
-.editor__preview-loading {
-  position: absolute;
-  inset: 0;
+.editor__preview-empty {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  background: #f5f7fa;
-  color: #6b7280;
-  font-size: 0.875rem;
-  z-index: 5;
-}
-
-.editor__preview-iframe {
   width: 100%;
   height: 100%;
-  border: none;
-  background: #fff;
+  color: #9ca3af;
+  font-size: 0.875rem;
 }
 </style>

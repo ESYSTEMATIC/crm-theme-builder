@@ -85,27 +85,6 @@ class PreviewFrameController extends Controller
         $html = str_replace('{{SEO_TITLE}}', htmlspecialchars($seoTitle, ENT_QUOTES, 'UTF-8'), $html);
         $html = str_replace('{{MICROSITE_JSON}}', json_encode($micrositeJson, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $html);
 
-        // Temporary diagnostic: visible debug banner to confirm JS executes in iframe
-        $debugScript = <<<'HTML'
-<script>
-(function(){
-  var d = document.createElement('div');
-  d.id = '__debug';
-  d.style.cssText = 'position:fixed;top:0;left:0;right:0;padding:8px;background:red;color:#fff;font:bold 14px sans-serif;z-index:99999;text-align:center;';
-  d.textContent = 'DEBUG: inline JS ran, waiting for DOMContentLoaded...';
-  document.documentElement.appendChild(d);
-  document.addEventListener('DOMContentLoaded', function(){
-    d.style.background = 'green';
-    d.textContent = 'DEBUG: DOMContentLoaded fired, sections=' + (window.__MICROSITE__?.route?.sections?.length || 0);
-    var root = document.getElementById('microsite-root');
-    d.textContent += ', root=' + (root ? 'found' : 'MISSING') + ', children=' + (root ? root.children.length : 0);
-    setTimeout(function(){ d.remove(); }, 5000);
-  });
-})();
-</script>
-HTML;
-        $html = str_replace('</head>', $debugScript . '</head>', $html);
-
         return response($html, 200, [
             'Content-Type' => 'text/html; charset=UTF-8',
             'Cache-Control' => 'no-store',
