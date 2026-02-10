@@ -13,9 +13,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(ThemeRegistry::class, function () {
-            return new ThemeRegistry();
-        });
+        $this->app->singleton(ThemeRegistry::class);
 
         $this->app->singleton(TenantConnectionManager::class, function () {
             return new TenantConnectionManager();

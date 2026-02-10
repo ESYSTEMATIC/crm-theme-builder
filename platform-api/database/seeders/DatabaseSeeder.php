@@ -7,9 +7,9 @@ use App\Models\Platform\SiteDomain;
 use App\Models\Platform\SiteVersion;
 use App\Models\Platform\SiteVersionPayload;
 use App\Models\Platform\Theme;
+use App\Models\Platform\ThemeManifest;
 use App\Models\Tenant\Property;
 use App\Services\TenantConnectionManager;
-use App\Services\ThemeRegistry;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -18,20 +18,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->command->info('Seeding platform database...');
 
-        // 1. Sync themes from disk
-        $registry = app(ThemeRegistry::class);
-        try {
-            $synced = $registry->syncAll();
-            $this->command->info('Synced themes: ' . implode(', ', $synced));
-        } catch (\Throwable $e) {
-            $this->command->warn('Could not sync themes from disk: ' . $e->getMessage());
-            $this->command->info('Creating theme-a-v1 manually...');
-
-            Theme::updateOrCreate(
-                ['key' => 'theme-a-v1'],
-                ['name' => 'Theme A', 'version' => '1.0.0', 'is_active' => true]
-            );
-        }
+        // 1. Seed themes directly into DB
+        $this->seedThemes();
 
         // 2. Create a sample site
         $theme = Theme::where('key', 'theme-a-v1')->first();
@@ -54,13 +42,7 @@ class DatabaseSeeder extends Seeder
         // 3. Create initial draft version with default payload
         $existingDraft = $site->draftVersion;
         if (!$existingDraft) {
-            $defaultPayload = [];
-            try {
-                $defaultPayload = $registry->getDefaultPayload('theme-a-v1');
-            } catch (\Throwable $e) {
-                $this->command->warn('Could not load default payload: ' . $e->getMessage());
-                $defaultPayload = $this->fallbackPayload();
-            }
+            $defaultPayload = $theme->default_payload_json;
 
             $version = SiteVersion::create([
                 'site_id' => $site->id,
@@ -93,6 +75,179 @@ class DatabaseSeeder extends Seeder
 
         // 5. Seed sample properties in tenant DB
         $this->seedTenantProperties();
+    }
+
+    private function seedThemes(): void
+    {
+        $themes = [
+            [
+                'key' => 'theme-a-v1',
+                'name' => 'Theme A',
+                'version' => '1.0.0',
+                'manifest' => [
+                    'key' => 'theme-a-v1',
+                    'name' => 'Theme A',
+                    'version' => '1.0.0',
+                    'routes' => [
+                        ['id' => 'home', 'path' => '/', 'type' => 'static', 'label' => 'Home'],
+                        ['id' => 'about', 'path' => '/about', 'type' => 'static', 'label' => 'About'],
+                        ['id' => 'listings', 'path' => '/listings', 'type' => 'collection', 'source' => 'properties', 'label' => 'Listings'],
+                        ['id' => 'listing-detail', 'path' => '/listings/:id', 'type' => 'detail', 'source' => 'properties', 'label' => 'Listing Detail'],
+                    ],
+                    'sections' => [
+                        'home' => ['header', 'hero', 'lead-form', 'footer'],
+                        'about' => ['header', 'hero', 'footer'],
+                        'listings' => ['header', 'gallery', 'footer'],
+                        'listing-detail' => ['header', 'hero', 'lead-form', 'footer'],
+                    ],
+                    'sectionTypes' => [
+                        'header' => ['label' => 'Header', 'props' => ['logoText' => 'string', 'navLinks' => 'array']],
+                        'hero' => ['label' => 'Hero', 'props' => ['title' => 'string', 'subtitle' => 'string', 'backgroundImage' => 'string']],
+                        'gallery' => ['label' => 'Gallery', 'props' => ['title' => 'string', 'columns' => 'number']],
+                        'lead-form' => ['label' => 'Lead Form', 'props' => ['headline' => 'string', 'submitLabel' => 'string']],
+                        'footer' => ['label' => 'Footer', 'props' => ['text' => 'string', 'links' => 'array']],
+                    ],
+                ],
+                'default_payload' => [
+                    'settings' => [
+                        'brand' => ['primaryColor' => '#2563eb', 'secondaryColor' => '#1e40af', 'font' => 'Inter, sans-serif'],
+                        'seo' => ['titleSuffix' => ' | My Website'],
+                    ],
+                    'routes' => [
+                        'home' => [
+                            'seo' => ['title' => 'Home'],
+                            'sections' => [
+                                ['type' => 'header', 'visible' => true, 'props' => ['logoText' => 'My Site', 'navLinks' => [['label' => 'Home', 'href' => '/'], ['label' => 'About', 'href' => '/about'], ['label' => 'Listings', 'href' => '/listings']]]],
+                                ['type' => 'hero', 'visible' => true, 'props' => ['title' => 'Find Your Dream Home', 'subtitle' => 'Browse our curated selection of premium properties', 'backgroundImage' => '']],
+                                ['type' => 'lead-form', 'visible' => true, 'props' => ['headline' => 'Get in Touch', 'submitLabel' => 'Send Message']],
+                                ['type' => 'footer', 'visible' => true, 'props' => ['text' => "\xC2\xA9 2024 My Site. All rights reserved.", 'links' => []]],
+                            ],
+                        ],
+                        'about' => [
+                            'seo' => ['title' => 'About Us'],
+                            'sections' => [
+                                ['type' => 'header', 'visible' => true, 'props' => ['logoText' => 'My Site', 'navLinks' => [['label' => 'Home', 'href' => '/'], ['label' => 'About', 'href' => '/about'], ['label' => 'Listings', 'href' => '/listings']]]],
+                                ['type' => 'hero', 'visible' => true, 'props' => ['title' => 'About Our Company', 'subtitle' => 'Dedicated to helping you find the perfect property', 'backgroundImage' => '']],
+                                ['type' => 'footer', 'visible' => true, 'props' => ['text' => "\xC2\xA9 2024 My Site. All rights reserved.", 'links' => []]],
+                            ],
+                        ],
+                        'listings' => [
+                            'seo' => ['title' => 'Listings'],
+                            'sections' => [
+                                ['type' => 'header', 'visible' => true, 'props' => ['logoText' => 'My Site', 'navLinks' => [['label' => 'Home', 'href' => '/'], ['label' => 'About', 'href' => '/about'], ['label' => 'Listings', 'href' => '/listings']]]],
+                                ['type' => 'gallery', 'visible' => true, 'props' => ['title' => 'Featured Properties', 'columns' => 3]],
+                                ['type' => 'footer', 'visible' => true, 'props' => ['text' => "\xC2\xA9 2024 My Site. All rights reserved.", 'links' => []]],
+                            ],
+                        ],
+                        'listing-detail' => [
+                            'seo' => ['title' => 'Property Details'],
+                            'sections' => [
+                                ['type' => 'header', 'visible' => true, 'props' => ['logoText' => 'My Site', 'navLinks' => [['label' => 'Home', 'href' => '/'], ['label' => 'About', 'href' => '/about'], ['label' => 'Listings', 'href' => '/listings']]]],
+                                ['type' => 'hero', 'visible' => true, 'props' => ['title' => '', 'subtitle' => '', 'backgroundImage' => '']],
+                                ['type' => 'lead-form', 'visible' => true, 'props' => ['headline' => 'Interested in this property?', 'submitLabel' => 'Request Info']],
+                                ['type' => 'footer', 'visible' => true, 'props' => ['text' => "\xC2\xA9 2024 My Site. All rights reserved.", 'links' => []]],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'key' => 'theme-b-v1',
+                'name' => 'Theme B - Bold Modern',
+                'version' => '1.0.0',
+                'manifest' => [
+                    'key' => 'theme-b-v1',
+                    'name' => 'Theme B - Bold Modern',
+                    'version' => '1.0.0',
+                    'routes' => [
+                        ['id' => 'home', 'path' => '/', 'label' => 'Home', 'type' => 'static'],
+                        ['id' => 'about', 'path' => '/about', 'label' => 'About', 'type' => 'static'],
+                        ['id' => 'listings', 'path' => '/listings', 'label' => 'Listings', 'type' => 'collection', 'source' => 'properties'],
+                        ['id' => 'listing-detail', 'path' => '/listings/:id', 'label' => 'Listing Detail', 'type' => 'detail', 'source' => 'properties'],
+                    ],
+                    'sections' => [
+                        'home' => ['navbar', 'banner', 'features', 'cta', 'site-footer'],
+                        'about' => ['navbar', 'banner', 'site-footer'],
+                        'listings' => ['navbar', 'property-grid', 'site-footer'],
+                        'listing-detail' => ['navbar', 'banner', 'cta', 'site-footer'],
+                    ],
+                    'sectionTypes' => [
+                        'navbar' => ['label' => 'Navigation Bar', 'props' => ['brandName' => 'string', 'links' => 'array']],
+                        'banner' => ['label' => 'Banner', 'props' => ['heading' => 'string', 'subheading' => 'string', 'ctaText' => 'string', 'ctaHref' => 'string']],
+                        'features' => ['label' => 'Features', 'props' => ['title' => 'string', 'items' => 'array']],
+                        'cta' => ['label' => 'Call to Action / Lead Form', 'props' => ['heading' => 'string', 'buttonLabel' => 'string']],
+                        'property-grid' => ['label' => 'Property Grid', 'props' => ['heading' => 'string', 'columns' => 'number']],
+                        'site-footer' => ['label' => 'Site Footer', 'props' => ['copyright' => 'string', 'links' => 'array']],
+                    ],
+                ],
+                'default_payload' => [
+                    'settings' => [
+                        'brand' => ['primaryColor' => '#f97316', 'secondaryColor' => '#ea580c', 'font' => 'Poppins, sans-serif'],
+                        'seo' => ['titleSuffix' => ' | Bold Realty'],
+                    ],
+                    'routes' => [
+                        'home' => [
+                            'seo' => ['title' => 'Home'],
+                            'sections' => [
+                                ['type' => 'navbar', 'visible' => true, 'props' => ['brandName' => 'Bold Realty', 'links' => [['label' => 'Home', 'href' => '/'], ['label' => 'About', 'href' => '/about'], ['label' => 'Listings', 'href' => '/listings']]]],
+                                ['type' => 'banner', 'visible' => true, 'props' => ['heading' => 'Live Bold. Live Here.', 'subheading' => 'Discover extraordinary properties curated for modern living', 'ctaText' => 'Browse Listings', 'ctaHref' => '/listings']],
+                                ['type' => 'features', 'visible' => true, 'props' => ['title' => 'Why Choose Us', 'items' => [['icon' => 'search', 'title' => 'Curated Selection', 'desc' => 'Hand-picked properties that meet the highest standards'], ['icon' => 'shield', 'title' => 'Trusted Agents', 'desc' => 'Work with experienced professionals who know your market'], ['icon' => 'zap', 'title' => 'Fast Closing', 'desc' => 'Streamlined process to get you into your dream home faster']]]],
+                                ['type' => 'cta', 'visible' => true, 'props' => ['heading' => 'Ready to find your dream home?', 'buttonLabel' => 'Get Started']],
+                                ['type' => 'site-footer', 'visible' => true, 'props' => ['copyright' => "\xC2\xA9 2024 Bold Realty. All rights reserved.", 'links' => []]],
+                            ],
+                        ],
+                        'about' => [
+                            'seo' => ['title' => 'About'],
+                            'sections' => [
+                                ['type' => 'navbar', 'visible' => true, 'props' => ['brandName' => 'Bold Realty', 'links' => [['label' => 'Home', 'href' => '/'], ['label' => 'About', 'href' => '/about'], ['label' => 'Listings', 'href' => '/listings']]]],
+                                ['type' => 'banner', 'visible' => true, 'props' => ['heading' => 'Our Story', 'subheading' => 'Building trust through exceptional service since 2020', 'ctaText' => '', 'ctaHref' => '']],
+                                ['type' => 'site-footer', 'visible' => true, 'props' => ['copyright' => "\xC2\xA9 2024 Bold Realty. All rights reserved.", 'links' => []]],
+                            ],
+                        ],
+                        'listings' => [
+                            'seo' => ['title' => 'Listings'],
+                            'sections' => [
+                                ['type' => 'navbar', 'visible' => true, 'props' => ['brandName' => 'Bold Realty', 'links' => [['label' => 'Home', 'href' => '/'], ['label' => 'About', 'href' => '/about'], ['label' => 'Listings', 'href' => '/listings']]]],
+                                ['type' => 'property-grid', 'visible' => true, 'props' => ['heading' => 'Available Properties', 'columns' => 3]],
+                                ['type' => 'site-footer', 'visible' => true, 'props' => ['copyright' => "\xC2\xA9 2024 Bold Realty. All rights reserved.", 'links' => []]],
+                            ],
+                        ],
+                        'listing-detail' => [
+                            'seo' => ['title' => 'Property Details'],
+                            'sections' => [
+                                ['type' => 'navbar', 'visible' => true, 'props' => ['brandName' => 'Bold Realty', 'links' => [['label' => 'Home', 'href' => '/'], ['label' => 'About', 'href' => '/about'], ['label' => 'Listings', 'href' => '/listings']]]],
+                                ['type' => 'banner', 'visible' => true, 'props' => ['heading' => '', 'subheading' => '', 'ctaText' => '', 'ctaHref' => '']],
+                                ['type' => 'cta', 'visible' => true, 'props' => ['heading' => 'Interested in this property?', 'buttonLabel' => 'Contact Agent']],
+                                ['type' => 'site-footer', 'visible' => true, 'props' => ['copyright' => "\xC2\xA9 2024 Bold Realty. All rights reserved.", 'links' => []]],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        foreach ($themes as $themeData) {
+            $theme = Theme::updateOrCreate(
+                ['key' => $themeData['key']],
+                [
+                    'name' => $themeData['name'],
+                    'version' => $themeData['version'],
+                    'is_active' => true,
+                    'default_payload_json' => $themeData['default_payload'],
+                ]
+            );
+
+            $manifest = $themeData['manifest'];
+            ThemeManifest::updateOrCreate(
+                ['theme_id' => $theme->id],
+                [
+                    'manifest_json' => $manifest,
+                    'checksum' => md5(json_encode($manifest)),
+                ]
+            );
+
+            $this->command->info("Seeded theme: {$themeData['key']}");
+        }
     }
 
     private function seedTenantProperties(): void
@@ -223,52 +378,5 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->command->info('Seeded ' . count($properties) . ' sample properties in tenant database.');
-    }
-
-    private function fallbackPayload(): array
-    {
-        return [
-            'settings' => [
-                'seo' => [
-                    'titleSuffix' => ' | Demo Real Estate',
-                ],
-                'branding' => [
-                    'primaryColor' => '#2563eb',
-                    'logo' => null,
-                ],
-            ],
-            'routes' => [
-                'home' => [
-                    'seo' => [
-                        'title' => 'Home',
-                    ],
-                    'sections' => [],
-                ],
-                'listings' => [
-                    'seo' => [
-                        'title' => 'Listings',
-                    ],
-                    'sections' => [],
-                ],
-                'listing-detail' => [
-                    'seo' => [
-                        'title' => 'Property Details',
-                    ],
-                    'sections' => [],
-                ],
-                'about' => [
-                    'seo' => [
-                        'title' => 'About Us',
-                    ],
-                    'sections' => [],
-                ],
-                'contact' => [
-                    'seo' => [
-                        'title' => 'Contact',
-                    ],
-                    'sections' => [],
-                ],
-            ],
-        ];
     }
 }

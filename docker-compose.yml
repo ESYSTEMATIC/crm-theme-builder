@@ -63,7 +63,6 @@ services:
       - "8000:8000"
     volumes:
       - ./platform-api:/app
-      - ./packages/theme-pack:/packages/theme-pack:ro
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -162,6 +161,24 @@ services:
     depends_on:
       - platform-api
       - site-gateway
+    networks:
+      - app-network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      - PMA_HOSTS=mysql_platform,mysql_tenant1
+      - PMA_USER=root
+      - PMA_PASSWORD=secret
+    depends_on:
+      mysql_platform:
+        condition: service_healthy
+      mysql_tenant1:
+        condition: service_healthy
     networks:
       - app-network
 

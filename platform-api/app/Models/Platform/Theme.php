@@ -17,10 +17,12 @@ class Theme extends Model
         'name',
         'version',
         'is_active',
+        'default_payload_json',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'default_payload_json' => 'array',
     ];
 
     public function manifest(): HasOne

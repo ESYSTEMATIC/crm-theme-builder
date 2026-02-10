@@ -29,7 +29,6 @@ return array(
     'AWS\\CRT\\NativeResource' => $vendorDir . '/aws/aws-crt-php/src/AWS/CRT/NativeResource.php',
     'AWS\\CRT\\OptionValue' => $vendorDir . '/aws/aws-crt-php/src/AWS/CRT/Options.php',
     'AWS\\CRT\\Options' => $vendorDir . '/aws/aws-crt-php/src/AWS/CRT/Options.php',
-    'App\\Console\\Commands\\SyncThemesCommand' => $baseDir . '/app/Console/Commands/SyncThemesCommand.php',
     'App\\Http\\Controllers\\DraftController' => $baseDir . '/app/Http/Controllers/DraftController.php',
     'App\\Http\\Controllers\\Internal\\SiteResolveController' => $baseDir . '/app/Http/Controllers/Internal/SiteResolveController.php',
     'App\\Http\\Controllers\\PreviewSessionController' => $baseDir . '/app/Http/Controllers/PreviewSessionController.php',

@@ -516,7 +516,6 @@ class ComposerStaticInitdf87b483c73268d2bb28b57968abf751
         'AWS\\CRT\\NativeResource' => __DIR__ . '/..' . '/aws/aws-crt-php/src/AWS/CRT/NativeResource.php',
         'AWS\\CRT\\OptionValue' => __DIR__ . '/..' . '/aws/aws-crt-php/src/AWS/CRT/Options.php',
         'AWS\\CRT\\Options' => __DIR__ . '/..' . '/aws/aws-crt-php/src/AWS/CRT/Options.php',
-        'App\\Console\\Commands\\SyncThemesCommand' => __DIR__ . '/../..' . '/app/Console/Commands/SyncThemesCommand.php',
         'App\\Http\\Controllers\\DraftController' => __DIR__ . '/../..' . '/app/Http/Controllers/DraftController.php',
         'App\\Http\\Controllers\\Internal\\SiteResolveController' => __DIR__ . '/../..' . '/app/Http/Controllers/Internal/SiteResolveController.php',
         'App\\Http\\Controllers\\PreviewSessionController' => __DIR__ . '/../..' . '/app/Http/Controllers/PreviewSessionController.php',
