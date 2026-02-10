@@ -148,22 +148,6 @@ services:
     networks:
       - app-network
 
-  nginx:
-    image: nginx:alpine
-    container_name: nginx
-    restart: unless-stopped
-    ports:
-      - "8080:80"
-    volumes:
-      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./infra/nginx/site-gateway.conf:/etc/nginx/conf.d/site-gateway.conf:ro
-      - ./infra/nginx/platform-api.conf:/etc/nginx/conf.d/platform-api.conf:ro
-    depends_on:
-      - platform-api
-      - site-gateway
-    networks:
-      - app-network
-
   phpmyadmin:
     image: phpmyadmin:latest
     container_name: phpmyadmin
