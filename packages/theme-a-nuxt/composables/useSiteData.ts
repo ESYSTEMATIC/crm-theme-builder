@@ -14,7 +14,7 @@ export function useSiteData() {
     const config = useRuntimeConfig()
     const apiUrl = config.platformApiUrl
 
-    const url = `${apiUrl}/api/internal/site-payload/${siteCtx.id}?mode=${siteCtx.mode}&version=${siteCtx.version}`
+    const url = `${apiUrl}/api/internal/site-payload/${siteCtx.id}`
     const data = await $fetch(url)
     return data
   }, {

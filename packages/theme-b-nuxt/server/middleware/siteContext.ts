@@ -9,8 +9,6 @@ export default defineEventHandler((event) => {
     id: headers['x-site-id'] ? parseInt(headers['x-site-id'], 10) : null,
     tenantId: headers['x-tenant-id'] || null,
     themeKey: headers['x-theme-key'] || null,
-    mode: headers['x-site-mode'] || 'published',
-    version: headers['x-site-version'] ? parseInt(headers['x-site-version'], 10) : null,
     slug: headers['x-site-slug'] || null,
   }
 })
