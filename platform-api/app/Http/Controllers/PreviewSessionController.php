@@ -45,7 +45,7 @@ class PreviewSessionController extends Controller
             'created_by' => null,
         ]);
 
-        $platformDomain = config('app.platform_domain', 'crmwebsite.com');
+        $platformDomain = config('app.platform_domain', 'listacrmsites.com');
         $runtimeScheme = config('app.runtime_scheme', 'https');
         $runtimePort = config('app.runtime_port', '');
         $portSuffix = $runtimePort ? ":{$runtimePort}" : '';

@@ -1,10 +1,11 @@
+import 'dotenv/config'
 import express from 'express'
 import { createProxyMiddleware } from 'http-proxy-middleware'
 import { initResolveHost, resolveHost } from './resolveHost.js'
 
 const app = express()
-const PORT = parseInt(process.env.PORT || '3000', 10)
-const PLATFORM_DOMAIN = process.env.PLATFORM_DOMAIN || 'crmwebsite.com'
+const PORT = parseInt(process.env.PORT, 10) || 3000
+const PLATFORM_DOMAIN = process.env.PLATFORM_DOMAIN
 
 // Parse THEME_ROUTES env: "solo-theme-v1=http://solo-theme:3000"
 const THEME_ROUTES = {}
@@ -15,13 +16,14 @@ const THEME_ROUTES = {}
 
 // Initialize database and Redis connections
 initResolveHost({
-  redisHost: process.env.REDIS_HOST || 'redis',
-  redisPort: parseInt(process.env.REDIS_PORT || '6379', 10),
-  dbHost: process.env.DB_PLATFORM_HOST || 'mysql_platform',
-  dbPort: parseInt(process.env.DB_PLATFORM_PORT || '3306', 10),
-  dbUser: process.env.DB_PLATFORM_USERNAME || 'root',
-  dbPassword: process.env.DB_PLATFORM_PASSWORD || 'secret',
-  dbName: process.env.DB_PLATFORM_DATABASE || 'microsite_platform',
+  redisHost: process.env.REDIS_HOST,
+  redisPort: parseInt(process.env.REDIS_PORT, 10) || 6379,
+  redisPassword: process.env.REDIS_PASSWORD,
+  dbHost: process.env.DB_PLATFORM_HOST,
+  dbPort: parseInt(process.env.DB_PLATFORM_PORT, 10) || 3306,
+  dbUser: process.env.DB_PLATFORM_USERNAME,
+  dbPassword: process.env.DB_PLATFORM_PASSWORD,
+  dbName: process.env.DB_PLATFORM_DATABASE,
 })
 
 /**

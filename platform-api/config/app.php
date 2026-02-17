@@ -48,7 +48,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'platform_domain' => env('PLATFORM_DOMAIN', 'crmwebsite.com'),
+    'platform_domain' => env('PLATFORM_DOMAIN', 'listacrmsites.com'),
 
     /*
     |--------------------------------------------------------------------------

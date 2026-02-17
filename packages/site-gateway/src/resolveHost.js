@@ -6,16 +6,16 @@ const CACHE_TTL = 300 // 5 minutes
 let redis
 let db
 
-export function initResolveHost({ redisHost, redisPort, dbHost, dbPort, dbUser, dbPassword, dbName }) {
-  redis = new Redis({ host: redisHost, port: redisPort || 6379, lazyConnect: true })
+export function initResolveHost({ redisHost, redisPort, redisPassword, dbHost, dbPort, dbUser, dbPassword, dbName }) {
+  redis = new Redis({ host: redisHost, port: redisPort, password: redisPassword || undefined, lazyConnect: true })
   redis.connect().catch(() => {})
 
   db = mysql.createPool({
     host: dbHost,
-    port: dbPort || 3306,
-    user: dbUser || 'root',
-    password: dbPassword || 'secret',
-    database: dbName || 'microsite_platform',
+    port: dbPort,
+    user: dbUser,
+    password: dbPassword,
+    database: dbName,
     waitForConnections: true,
     connectionLimit: 10,
   })
@@ -77,7 +77,7 @@ export async function resolveHost(host, platformDomain) {
 }
 
 /**
- * Parse slug from hostname like {slug}.crmwebsite.com
+ * Parse slug from hostname like {slug}.listacrmsites.com
  */
 function parseSlugFromHost(host, platformDomain) {
   const suffix = '.' + platformDomain

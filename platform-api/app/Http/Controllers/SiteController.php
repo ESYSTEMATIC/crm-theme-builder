@@ -84,7 +84,7 @@ class SiteController extends Controller
             ]);
 
             // Create the platform subdomain domain entry
-            $platformDomain = config('app.platform_domain', 'crmwebsite.com');
+            $platformDomain = config('app.platform_domain', 'listacrmsites.com');
             SiteDomain::create([
                 'site_id' => $site->id,
                 'host' => "{$validated['slug']}.{$platformDomain}",

@@ -87,7 +87,7 @@ services:
       - /app/node_modules
     environment:
       - PORT=3000
-      - PLATFORM_DOMAIN=crmwebsite.com
+      - PLATFORM_DOMAIN=listacrmsites.com
       - DB_PLATFORM_HOST=mysql_platform
       - DB_PLATFORM_PORT=3306
       - DB_PLATFORM_USERNAME=root

@@ -62,7 +62,7 @@ class DatabaseSeeder extends Seeder
 
         // 4. Create platform subdomain domain
         SiteDomain::updateOrCreate(
-            ['host' => 'demo-site.crmwebsite.com'],
+            ['host' => 'demo-site.listacrmsites.com'],
             [
                 'site_id' => $site->id,
                 'type' => 'platform_subdomain',
@@ -71,7 +71,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $this->command->info('Created platform subdomain: demo-site.crmwebsite.com');
+        $this->command->info('Created platform subdomain: demo-site.listacrmsites.com');
 
         // 5. Seed sample properties in tenant DB
         $this->seedTenantProperties();

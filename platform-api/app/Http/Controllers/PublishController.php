@@ -67,7 +67,7 @@ class PublishController extends Controller
         });
 
         // Bust gateway Redis cache (raw key, not Laravel-prefixed) so published content is served immediately
-        Redis::del("site_host:{$site->slug}." . config('app.platform_domain', 'crmwebsite.com'));
+        Redis::del("site_host:{$site->slug}." . config('app.platform_domain', 'listacrmsites.com'));
 
         // Reload the site with updated relations
         $site->load(['theme', 'domains', 'publishedVersion', 'draftVersion']);
