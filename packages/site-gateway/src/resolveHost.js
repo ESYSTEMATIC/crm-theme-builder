@@ -2,6 +2,7 @@ import Redis from 'ioredis'
 import mysql from 'mysql2/promise'
 
 const CACHE_TTL = 300 // 5 minutes
+const NEGATIVE_CACHE_TTL = 60 // 1 minute for 404s
 
 let redis
 let db
@@ -23,7 +24,7 @@ export function initResolveHost({ redisHost, redisPort, redisPassword, dbHost, d
 
 /**
  * Resolve a hostname to site data.
- * Custom domain first, then slug wildcard.
+ * Looks up full domain (custom or subdomain) in microsite_domains table.
  */
 export async function resolveHost(host, platformDomain) {
   const cacheKey = `site_host:${host}`
@@ -31,45 +32,50 @@ export async function resolveHost(host, platformDomain) {
   // Try Redis cache first
   try {
     const cached = await redis.get(cacheKey)
+    if (cached === '__null__') return null
     if (cached) return JSON.parse(cached)
   } catch {}
 
   let siteData = null
 
-  // 1. Try exact custom domain match
-  const [domainRows] = await db.query(
-    `SELECT s.id, s.tenant_id, s.slug, t.\`key\` AS theme_key
-     FROM site_domains sd
-     JOIN sites s ON s.id = sd.site_id
-     JOIN themes t ON t.id = s.theme_id
-     WHERE sd.host = ? AND sd.status = ?`,
-    [host, 'verified']
-  )
-  if (domainRows.length > 0) {
-    siteData = domainRows[0]
-  }
+  try {
+    // 1. Try exact domain match
+    const [rows] = await db.query(
+      `SELECT id, tenant_id, domain, theme_key
+       FROM microsite_domains
+       WHERE domain = ? AND is_active = 1 AND deleted_at IS NULL`,
+      [host]
+    )
+    if (rows.length > 0) {
+      siteData = rows[0]
+    }
 
-  // 2. Try slug from platform wildcard
-  if (!siteData) {
-    const slug = parseSlugFromHost(host, platformDomain)
-    if (slug) {
-      const [rows] = await db.query(
-        `SELECT s.id, s.tenant_id, s.slug, t.\`key\` AS theme_key
-         FROM sites s
-         JOIN themes t ON t.id = s.theme_id
-         WHERE s.slug = ?`,
-        [slug]
-      )
-      if (rows.length > 0) {
-        siteData = rows[0]
+    // 2. Try subdomain match (e.g., slug.listacrmsites.com)
+    if (!siteData) {
+      const subdomain = parseSubdomain(host, platformDomain)
+      if (subdomain) {
+        const [subRows] = await db.query(
+          `SELECT id, tenant_id, domain, theme_key
+           FROM microsite_domains
+           WHERE domain = ? AND is_active = 1 AND deleted_at IS NULL`,
+          [subdomain + '.' + platformDomain]
+        )
+        if (subRows.length > 0) {
+          siteData = subRows[0]
+        }
       }
     }
+  } catch (err) {
+    console.error('DB query error in resolveHost:', err.message)
+    return null
   }
 
-  // Cache result
+  // Cache result (including negative lookups)
   try {
     if (siteData) {
       await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(siteData))
+    } else {
+      await redis.setex(cacheKey, NEGATIVE_CACHE_TTL, '__null__')
     }
   } catch {}
 
@@ -77,14 +83,14 @@ export async function resolveHost(host, platformDomain) {
 }
 
 /**
- * Parse slug from hostname like {slug}.listacrmsites.com
+ * Extract subdomain from hostname like {sub}.listacrmsites.com
  */
-function parseSlugFromHost(host, platformDomain) {
+function parseSubdomain(host, platformDomain) {
   const suffix = '.' + platformDomain
   if (host.endsWith(suffix)) {
-    const slug = host.slice(0, -suffix.length)
-    if (slug && !slug.includes('.')) {
-      return slug
+    const sub = host.slice(0, -suffix.length)
+    if (sub && !sub.includes('.')) {
+      return sub
     }
   }
   return null

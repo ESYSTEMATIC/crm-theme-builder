@@ -7,11 +7,28 @@ const app = express()
 const PORT = parseInt(process.env.PORT, 10) || 3000
 const PLATFORM_DOMAIN = process.env.PLATFORM_DOMAIN
 
-// Parse THEME_ROUTES env: "solo-theme-v1=http://solo-theme:3000"
+// Parse THEME_ROUTES env and pre-create proxy instances
 const THEME_ROUTES = {}
+const THEME_PROXIES = {}
 ;(process.env.THEME_ROUTES || '').split(',').forEach((entry) => {
   const [key, url] = entry.split('=')
-  if (key && url) THEME_ROUTES[key.trim()] = url.trim()
+  if (key && url) {
+    const target = url.trim()
+    THEME_ROUTES[key.trim()] = target
+    THEME_PROXIES[key.trim()] = createProxyMiddleware({
+      target,
+      changeOrigin: true,
+      ws: false,
+      on: {
+        error: (err, _req, res) => {
+          console.error(`Proxy error to ${target}:`, err.message)
+          if (!res.headersSent) {
+            res.status(502).send('Theme server unavailable')
+          }
+        },
+      },
+    })
+  }
 })
 
 // Initialize database and Redis connections
@@ -41,9 +58,9 @@ app.use(async (req, res, next) => {
     return res.status(500).send('Site has no theme assigned')
   }
 
-  // Find target Nuxt server for this theme
-  const target = THEME_ROUTES[siteData.theme_key]
-  if (!target) {
+  // Find pre-created proxy for this theme
+  const proxy = THEME_PROXIES[siteData.theme_key]
+  if (!proxy) {
     return res.status(500).send(`No Nuxt server configured for theme: ${siteData.theme_key}`)
   }
 
@@ -51,22 +68,7 @@ app.use(async (req, res, next) => {
   req.headers['x-site-id'] = String(siteData.id)
   req.headers['x-tenant-id'] = String(siteData.tenant_id)
   req.headers['x-theme-key'] = siteData.theme_key
-  req.headers['x-site-slug'] = siteData.slug
-
-  // Proxy to theme Nuxt server
-  const proxy = createProxyMiddleware({
-    target,
-    changeOrigin: true,
-    ws: false,
-    on: {
-      error: (err, _req, res) => {
-        console.error(`Proxy error to ${target}:`, err.message)
-        if (!res.headersSent) {
-          res.status(502).send('Theme server unavailable')
-        }
-      },
-    },
-  })
+  req.headers['x-site-domain'] = siteData.domain
 
   proxy(req, res, next)
 })
